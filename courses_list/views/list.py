@@ -1,3 +1,4 @@
+from django.db.models import Q
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -19,10 +20,8 @@ class CourseListView(ListAPIView):
 
     def list(self, request, *args, **kwargs):
         qs = self.get_queryset()
-        title = get_param(request.query_params, "title", str)
-        if title:
-            qs = qs.filter(display_name=title)
-        language = get_param(request.query_params, "language", str)
-        if language:
-            qs = qs.filter(language=language)
+        filterText = get_param(request.query_params, "filterText", str)
+        if filterText:
+            qs = qs.filter(Q(display_name__icontains=filterText) | Q(language__icontains=filterText))
+
         return Response(list(qs.values('display_name', 'language')), status=200)
